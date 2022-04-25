@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import face_recognition as fr
 from charset_normalizer import detect
+from multiprocessing import Process
 
 
 def init():
@@ -84,9 +85,12 @@ def recognize_faces(frame):
             cv2.imwrite("./detections/gary.jpg", frame)
 
 
-if __name__ == "__main__":
+def main():
     init()
     print("Init Complete")
     train_images()
-    print("Training Complete")
     display_video()
+
+
+if __name__ == "__main__":
+    main()
