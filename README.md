@@ -4,10 +4,19 @@
 
 A python program designed to access the devices camera and run facial recognition and gender classification on the video feed. 
 
-- learnt how to use tkinter to make a GUI
-- learnt how to use open-cv to do image manipulation, and use the integrated facial recognition. 
-- learnt how to incorporate DNN gender classification.
-- learnt how to manipulate files and their locations
+## What I Learnt
+- how to use tkinter to make a GUI
+- how to use open-cv to do image manipulation, and use the integrated facial recognition. 
+- how to incorporate DNN gender classification.
+- how to manipulate files and their locations
+
+## How to Install
+
+Install the requirements.txt file by running
+
+> pip install -r requirements.txt
+
+Run main.py to run the program directly or run menu.py to run the GUI alternative
 
 ## Features
 
