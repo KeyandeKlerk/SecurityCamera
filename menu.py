@@ -17,7 +17,6 @@ def open_files():
 window = Tk()
 
 window.title("Face Recognition")
-window.iconbitmap("ico.ico")
 window.geometry("400x368+760+200")
 window.configure(bg="#230043", pady=20)
 window.resizable(False, False)
@@ -26,7 +25,7 @@ images_button = Button(window, text="PUT IMAGES", font=font, command=lambda: ope
 ), width="12", fg="#230043", bg="#b28baf", height="1")
 images_button.pack()
 
-run_button = Button(window, text="FIND FACES", font=font, command=lambda: webcamfacerecogntion.run(
+run_button = Button(window, text="FIND FACES", font=font, command=lambda: main.main(
 ), width="12", fg="#230043", bg="#b28baf", height="1")
 run_button.pack()
 
