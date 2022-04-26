@@ -2,6 +2,61 @@ import face_recognition
 import cv2
 import numpy as np
 import os
+from datetime import datetime
+
+# Function to check if face is already in detections folder
+
+
+def checkUnique(frame):
+
+    date = datetime.now()
+    s = date.strftime("%c")
+    formatted_date = s.replace(" ", "_")
+    formatted_date = formatted_date.replace(":", "-")
+    filename = "./detections/%s.jpg" % formatted_date
+
+    # Get directory path
+    folder_dir = "C:\\Users\\Keyan\\Programming Projects\\Python\\SecurityCamera\\detections"
+    current_image = frame
+    highest_likeness = 0
+
+    for images in os.listdir(folder_dir):
+        if (images.endswith(".jpg")):
+            base = cv2.imread(folder_dir + "\\" + images)
+
+            # Image manipulation
+            hsv_base = cv2.cvtColor(base, cv2.COLOR_BGR2HSV)
+            hsv_test = cv2.cvtColor(current_image, cv2.COLOR_BGR2HSV)
+
+            h_bins = 50
+            s_bins = 60
+            histSize = [h_bins, s_bins]
+            h_ranges = [0, 180]
+            s_ranges = [0, 256]
+            ranges = h_ranges + s_ranges
+            channels = [0, 1]
+
+            hist_base = cv2.calcHist(
+                [hsv_base], channels, None, histSize, ranges, accumulate=False)
+            cv2.normalize(hist_base, hist_base, alpha=0,
+                          beta=1, norm_type=cv2.NORM_MINMAX)
+            hist_test = cv2.calcHist(
+                [hsv_test], channels, None, histSize, ranges, accumulate=False)
+            cv2.normalize(hist_test, hist_test, alpha=0,
+                          beta=1, norm_type=cv2.NORM_MINMAX)
+
+            # Compare hist of the 2 images
+            compare_method = cv2.HISTCMP_CORREL
+            base_test = cv2.compareHist(
+                hist_base, hist_test, compare_method)
+
+            if base_test > highest_likeness:
+                highest_likeness = base_test
+
+        # Only write image to detections folder if likeness to other images is less that 90%
+        if highest_likeness < 0.9:
+            cv2.imwrite(
+                filename, frame)
 
 
 def main():
@@ -106,8 +161,10 @@ def main():
 
                 face_names.append(name)
                 gender_names.append(gender)
+
+                # If face is found that is not in training set
                 if name == "":
-                    cv2.imwrite("./detections/gary.jpg", frame)
+                    checkUnique(frame)
 
         process_this_frame = not process_this_frame
 
