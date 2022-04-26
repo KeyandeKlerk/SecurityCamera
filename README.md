@@ -20,6 +20,12 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 
 ## Features
 
+- Facial recognition based on dataset
+- Gender classification on dataset
+- Unknown faces are saved to detections folder
+- Gender classification on detection folder images
+
+
 ### Main.py
 
 - Access Webcam 
@@ -35,13 +41,6 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 - Find faces (redirects to main.py)
 - Exit program
 
-## TO DO Soon
+## TO DO
 
-:heavy_check_mark: Only insert face into detections folder if not already there <br/>
-:heavy_check_mark: Gender classification on detection folder images <br/>
-:heavy_check_mark: Allow more training images /train/s{number}/{name}{number}.jpg <br/>
 :white_large_square: Age classification on detection folder
-
-## TO DO Future
-
-- ALPR

@@ -88,7 +88,7 @@ def checkUnique(frame):
             if base_test > highest_likeness:
                 highest_likeness = base_test
 
-        # Only write image to detections folder if likeness to other images is less that 90%
+    # Only write image to detections folder if likeness to other images is less that 90%
     if highest_likeness < 0.85:
 
         # Create formatted filename for predictGender
@@ -126,7 +126,7 @@ def predictGender(image_path):
     gender = gender_list[gender_preds[0].argmax()]
     return gender
 
-# Function to predict age from image
+# Function to train model with user images
 
 
 def trainModel(training_folder):
