@@ -15,7 +15,7 @@ def init():
 
     # Loading the net from gender classification
     gender_net = cv2.dnn.readNetFromCaffe(
-        'deploy_gender.prototxt', 'gender_net.caffemodel')
+        './src/deploy_gender.prototxt', './src/gender_net.caffemodel')
     MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
 
     # Labels of Gender
