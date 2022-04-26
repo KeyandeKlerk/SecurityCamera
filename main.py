@@ -45,9 +45,7 @@ def checkUnique(frame):
 
     counter = 0
     date = datetime.now()
-    s = date.strftime("%c")
-    formatted_date = s.replace(" ", "_")
-    formatted_date = formatted_date.replace(":", "-")
+    formatted_date = date.strftime("%Y-%m-%d-%H-%M-%S")
     filename = "./detections/%s.jpg" % formatted_date
 
     # Get directory path
@@ -88,7 +86,7 @@ def checkUnique(frame):
             if base_test > highest_likeness:
                 highest_likeness = base_test
 
-    # Only write image to detections folder if likeness to other images is less that 90%
+    # Only write image to detections folder if likeness to other images is less that 85%
     if highest_likeness < 0.85:
 
         # Create formatted filename for predictGender
@@ -118,12 +116,14 @@ def checkUnique(frame):
 
 
 def predictGender(image_path):
+
     face_img = cv2.imread(image_path)
     blob = cv2.dnn.blobFromImage(
         face_img, 1, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
     gender_net.setInput(blob)
     gender_preds = gender_net.forward()
     gender = gender_list[gender_preds[0].argmax()]
+
     return gender
 
 # Function to train model with user images
@@ -196,7 +196,7 @@ def main():
                 name = ""
                 gender = ""
 
-                # # If a match was found in known_face_encodings, just use the first one.
+                # If a match was found in known_face_encodings, just use the first one.
                 # if True in matches:
                 #     first_match_index = matches.index(True)
                 #     name = known_face_names[first_match_index]
@@ -242,7 +242,7 @@ def main():
                             font, 0.8, (255, 255, 255), 1)
 
         # Display the resulting image
-        cv2.imshow('Face Recognition', frame)
+        cv2.imshow('Keyan\'s Smart Camera', frame)
 
         # Hit 'q' on the keyboard to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
