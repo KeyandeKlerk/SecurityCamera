@@ -43,4 +43,4 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 
 ## TO DO
 
-:white_large_square: Save detection images in folders by date
+N/A
