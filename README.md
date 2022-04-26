@@ -26,7 +26,7 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 - Gender classification on detection folder images
 
 
-### Main.py
+### main.py
 
 - Access Webcam 
 - Train models 
@@ -34,7 +34,7 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 - Facial recognition on every second frame of video feed
 - If face detected that is not in training models then saves frame to detections folder
 
-### Menu.py
+### gui.py
 
 - GUI interface 
 - Upload images
