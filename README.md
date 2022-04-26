@@ -39,8 +39,8 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 
 :heavy_check_mark: Only insert face into detections folder if not already there <br/>
 :heavy_check_mark: Gender classification on detection folder images <br/>
-:heavy_check_mark: Allow more training images /train/s{number}/{name}{number}.jpg
-:white_large_square: Age classification on detection folder <br/>
+:heavy_check_mark: Allow more training images /train/s{number}/{name}{number}.jpg <br/>
+:white_large_square: Age classification on detection folder
 
 ## TO DO Future
 
