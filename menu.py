@@ -16,7 +16,7 @@ def open_files():
 
 window = Tk()
 
-window.title("Face Recognition")
+window.title("Facial Recognition")
 window.geometry("400x368+760+200")
 window.configure(bg="#230043", pady=20)
 window.resizable(False, False)
