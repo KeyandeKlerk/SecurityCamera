@@ -20,9 +20,9 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 
 ## Features
 
-- Facial recognition based on dataset
+- Facial recognition based on training dataset
 - Gender classification on dataset
-- Unknown faces are saved to detections folder
+- Unknown faces are saved to detections folder sorted by date
 - Gender classification on detection folder images
 
 
@@ -43,4 +43,4 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 
 ## TO DO
 
-:white_large_square: Age classification on detection folder
+:white_large_square: Save detection images in folders by date

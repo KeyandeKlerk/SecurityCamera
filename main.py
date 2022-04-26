@@ -2,7 +2,6 @@ import face_recognition
 import cv2
 import numpy as np
 import os
-from os import path
 from datetime import datetime
 
 # Init Function
@@ -11,7 +10,7 @@ from datetime import datetime
 def init():
     global gender_net, gender_list, MODEL_MEAN_VALUES, webcam_video
     global known_face_encodings, known_face_names, known_gender
-    global face_encodings, face_locations, face_names, gender_names, process_this_frame
+    global face_encodings, face_locations, face_names, gender_names
 
     # Loading the net from gender classification
     gender_net = cv2.dnn.readNetFromCaffe(
@@ -35,7 +34,7 @@ def init():
     face_names = []
     gender_names = []
 
-    print("Init complete")
+    print('Init complete')
 
 
 # Function to check if face is already in detections folder
@@ -44,72 +43,79 @@ def init():
 def checkUnique(frame):
 
     counter = 0
+
     date = datetime.now()
-    formatted_date = date.strftime("%Y-%m-%d-%H-%M-%S")
-    filename = "./detections/%s.jpg" % formatted_date
+    formatted_date = date.strftime('%Y-%m-%d')
+    formatted_time = date.strftime('%H-%M-%S')
 
-    # Get directory path
-    folder_dir = "C:\\Users\\Keyan\\Programming Projects\\Python\\SecurityCamera\\detections"
-    current_image = frame
-    highest_likeness = 0
+    # Get directory path of images
+    folder_dir = ''.join(
+        (os.getcwd(), '\\', 'detections', '\\', formatted_date))
 
-    for images in os.listdir(folder_dir):
-        if (images.endswith(".jpg")):
-            base = cv2.imread(folder_dir + "\\" + images)
+    # End result with look as follows
+    # C:\Users\Keyan\Programming Projects\Python\SecurityCamera\detections\2022-04-26\23-31-14.jpg
+    formatted_filename = ''.join(
+        (folder_dir, '\\', formatted_time, ".jpg"))
 
-            # Image manipulation
-            hsv_base = cv2.cvtColor(base, cv2.COLOR_BGR2HSV)
-            hsv_test = cv2.cvtColor(current_image, cv2.COLOR_BGR2HSV)
+    # Checks if directory exists else makes one
+    # This means its the first face detected for the day
+    if os.path.isdir(folder_dir) == False:
+        os.mkdir(folder_dir)
 
-            h_bins = 50
-            s_bins = 60
-            histSize = [h_bins, s_bins]
-            h_ranges = [0, 180]
-            s_ranges = [0, 256]
-            ranges = h_ranges + s_ranges
-            channels = [0, 1]
+    else:
+        highest_likeness = 0
 
-            hist_base = cv2.calcHist(
-                [hsv_base], channels, None, histSize, ranges, accumulate=False)
-            cv2.normalize(hist_base, hist_base, alpha=0,
-                          beta=1, norm_type=cv2.NORM_MINMAX)
-            hist_test = cv2.calcHist(
-                [hsv_test], channels, None, histSize, ranges, accumulate=False)
-            cv2.normalize(hist_test, hist_test, alpha=0,
-                          beta=1, norm_type=cv2.NORM_MINMAX)
+        # Loops through all the images in the detection folder for todays date
+        for images in os.listdir(folder_dir):
+            if (images.endswith('.jpg')):
+                base = cv2.imread(folder_dir + '\\' + images)
 
-            # Compare hist of the 2 images
-            compare_method = cv2.HISTCMP_CORREL
-            base_test = cv2.compareHist(
-                hist_base, hist_test, compare_method)
+                # Image manipulation
+                hsv_base = cv2.cvtColor(base, cv2.COLOR_BGR2HSV)
+                hsv_test = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-            if base_test > highest_likeness:
-                highest_likeness = base_test
+                h_bins = 50
+                s_bins = 60
+                histSize = [h_bins, s_bins]
+                h_ranges = [0, 180]
+                s_ranges = [0, 256]
+                ranges = h_ranges + s_ranges
+                channels = [0, 1]
 
-    # Only write image to detections folder if likeness to other images is less that 85%
-    if highest_likeness < 0.85:
+                hist_base = cv2.calcHist(
+                    [hsv_base], channels, None, histSize, ranges, accumulate=False)
+                cv2.normalize(hist_base, hist_base, alpha=0,
+                              beta=1, norm_type=cv2.NORM_MINMAX)
+                hist_test = cv2.calcHist(
+                    [hsv_test], channels, None, histSize, ranges, accumulate=False)
+                cv2.normalize(hist_test, hist_test, alpha=0,
+                              beta=1, norm_type=cv2.NORM_MINMAX)
 
-        # Create formatted filename for predictGender
-        formatted_filename = filename[13:]
-        formatted_filename = "".join(
-            (folder_dir, "\\", formatted_filename))
+                # Compare hist of the 2 images
+                compare_method = cv2.HISTCMP_CORREL
+                base_test = cv2.compareHist(
+                    hist_base, hist_test, compare_method)
 
-        cv2.imwrite(
-            filename, frame)
+                if base_test > highest_likeness:
+                    highest_likeness = base_test
 
-        predicted_gender = predictGender(formatted_filename)
+        # Only write image to detections folder if likeness to other images is less that 85%
+        if highest_likeness < 0.85:
+            cv2.imwrite(
+                formatted_filename, frame)
 
-        new_filename = "".join(
-            (filename[:-4], "_", predicted_gender))
+            predicted_gender = predictGender(formatted_filename)
+            new_filename = ''.join(
+                (formatted_filename[:-4], '_', predicted_gender))
 
-        # Checks if image exists and if so adds counter to file name
-        if path.exists(new_filename + ".jpg"):
-            os.rename(formatted_filename, "".join(
-                (new_filename, "_", str(counter), ".jpg")))
-            counter += 1
-        else:
-            os.rename(formatted_filename, "".join(
-                (new_filename, ".jpg")))
+            # Checks if image exists and if so adds counter to file name
+            if os.path.exists(new_filename + '.jpg'):
+                os.rename(formatted_filename, ''.join(
+                    (new_filename, '_', str(counter), '.jpg')))
+                counter += 1
+            else:
+                os.rename(formatted_filename, ''.join(
+                    (new_filename, '.jpg')))
 
 
 # Function to predict the gender
@@ -133,10 +139,10 @@ def trainModel(training_folder):
 
     dirs = os.listdir(training_folder)
     for dir_name in dirs:
-        if not dir_name.startswith("s"):
+        if not dir_name.startswith('s'):
             continue
-        _label = int(dir_name.replace("s", ""))
-        persons_path = training_folder + "/" + dir_name
+        _label = int(dir_name.replace('s', ''))
+        persons_path = training_folder + '/' + dir_name
         persons = os.listdir(persons_path)
 
         # Manipulates each image in the folder of persons
@@ -154,7 +160,7 @@ def trainModel(training_folder):
             known_face_names.append(person_name)
             known_gender.append(person_gender)
 
-    print("Model training complete")
+    print('Model training complete')
 
 # Starting point of program
 
@@ -162,7 +168,7 @@ def trainModel(training_folder):
 def main():
     init()
     trainModel(
-        "C:\\Users\\Keyan\\Programming Projects\\Python\\SecurityCamera\\train")
+        ''.join((os.getcwd(), '\\', 'train')))
 
     process_this_frame = True
     while True:
@@ -170,7 +176,7 @@ def main():
         ret, frame = webcam_video.read()
         font = cv2.FONT_HERSHEY_DUPLEX
 
-        cv2.putText(frame, "Press Q to quit.", (0, 30),
+        cv2.putText(frame, 'Press Q to Quit.', (0, 30),
                     font, 0.8, (255, 255, 255), 1)
 
         # Resize frame of video to 1/4 size for faster face recognition processing
@@ -181,6 +187,7 @@ def main():
 
         # Only process every other frame of video to save time
         if process_this_frame:
+
             # Find all the faces and face encodings in the current frame of video
             face_locations = face_recognition.face_locations(rgb_small_frame)
             face_encodings = face_recognition.face_encodings(
@@ -193,8 +200,8 @@ def main():
                 matches = face_recognition.compare_faces(
                     known_face_encodings, face_encoding)
                 global name, gender
-                name = ""
-                gender = ""
+                name = ''
+                gender = ''
 
                 # If a match was found in known_face_encodings, just use the first one.
                 # if True in matches:
@@ -214,13 +221,14 @@ def main():
                 gender_names.append(gender)
 
                 # If face is found that is not in training set
-                if name == "":
+                if name == '':
                     checkUnique(frame)
 
         process_this_frame = not process_this_frame
 
         # Display the results
         for (top, right, bottom, left), name in zip(face_locations, face_names):
+
             # Scale back up face locations since the frame we detected in was scaled to 1/4 size
             top *= 4
             right *= 4
@@ -230,7 +238,8 @@ def main():
             # Draw a box around the face
             cv2.rectangle(frame, (left, top), (right, bottom), (255, 0, 0), 2)
 
-            if name != "":
+            if name != '':
+
                 # Draw a label with a name and gender below the face
                 cv2.rectangle(frame, (left, bottom),
                               (right, bottom + 56), (255, 0, 0), cv2.FILLED)
@@ -253,8 +262,8 @@ def main():
     cv2.destroyAllWindows()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
 else:
-    print("Running by module")
+    print('Running by module')
