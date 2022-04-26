@@ -2,13 +2,48 @@ import face_recognition
 import cv2
 import numpy as np
 import os
+from os import path
 from datetime import datetime
+
+# Init Function
+
+
+def init():
+    global gender_net, gender_list, MODEL_MEAN_VALUES, webcam_video
+    global known_face_encodings, known_face_names, known_gender
+    global face_encodings, face_locations, face_names, gender_names, process_this_frame
+
+    # Loading the net from gender classification
+    gender_net = cv2.dnn.readNetFromCaffe(
+        'deploy_gender.prototxt', 'gender_net.caffemodel')
+    MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
+
+    # Labels of Gender
+    gender_list = ['Male', 'Female']
+
+    # Get a reference to webcam video
+    webcam_video = cv2.VideoCapture(0)
+
+    # Create arrays of known face encodings, their names and their genders
+    known_face_encodings = []
+    known_face_names = []
+    known_gender = []
+
+    # Initialize some variables
+    face_locations = []
+    face_encodings = []
+    face_names = []
+    gender_names = []
+
+    print("Init complete")
+
 
 # Function to check if face is already in detections folder
 
 
 def checkUnique(frame):
 
+    counter = 0
     date = datetime.now()
     s = date.strftime("%c")
     formatted_date = s.replace(" ", "_")
@@ -54,72 +89,88 @@ def checkUnique(frame):
                 highest_likeness = base_test
 
         # Only write image to detections folder if likeness to other images is less that 90%
-        if highest_likeness < 0.9:
-            cv2.imwrite(
-                filename, frame)
+    if highest_likeness < 0.85:
+
+        # Create formatted filename for predictGender
+        formatted_filename = filename[13:]
+        formatted_filename = "".join(
+            (folder_dir, "\\", formatted_filename))
+
+        cv2.imwrite(
+            filename, frame)
+
+        predicted_gender = predictGender(formatted_filename)
+
+        new_filename = "".join(
+            (filename[:-4], "_", predicted_gender))
+
+        # Checks if image exists and if so adds counter to file name
+        if path.exists(new_filename + ".jpg"):
+            os.rename(formatted_filename, "".join(
+                (new_filename, "_", str(counter), ".jpg")))
+            counter += 1
+        else:
+            os.rename(formatted_filename, "".join(
+                (new_filename, ".jpg")))
+
+
+# Function to predict the gender
+
+
+def predictGender(image_path):
+    face_img = cv2.imread(image_path)
+    blob = cv2.dnn.blobFromImage(
+        face_img, 1, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
+    gender_net.setInput(blob)
+    gender_preds = gender_net.forward()
+    gender = gender_list[gender_preds[0].argmax()]
+    return gender
+
+# Function to predict age from image
+
+
+def trainModel(training_folder):
+
+    dirs = os.listdir(training_folder)
+    for dir_name in dirs:
+        if not dir_name.startswith("s"):
+            continue
+        _label = int(dir_name.replace("s", ""))
+        persons_path = training_folder + "/" + dir_name
+        persons = os.listdir(persons_path)
+
+        # Manipulates each image in the folder of persons
+        for person in persons:
+            image_path = persons_path + '/' + person
+            filename = person[:-4]
+
+            person_image = face_recognition.load_image_file(image_path)
+            person_face_encoding = face_recognition.face_encodings(person_image)[
+                0]
+            person_name = filename
+            person_gender = predictGender(image_path)
+
+            known_face_encodings.append(person_face_encoding)
+            known_face_names.append(person_name)
+            known_gender.append(person_gender)
+
+    print("Model training complete")
+
+# Starting point of program
 
 
 def main():
-    # Loading the net from gender classification
-    gender_net = cv2.dnn.readNetFromCaffe(
-        'deploy_gender.prototxt', 'gender_net.caffemodel')
-    MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
+    init()
+    trainModel(
+        "C:\\Users\\Keyan\\Programming Projects\\Python\\SecurityCamera\\train")
 
-    # Labels of Gender
-    gender_list = ['Male', 'Female']
-
-    # Function to predict the gender
-    def predictGender(image_path):
-        face_img = cv2.imread(image_path)
-        blob = cv2.dnn.blobFromImage(
-            face_img, 1, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
-        gender_net.setInput(blob)
-        gender_preds = gender_net.forward()
-        gender = gender_list[gender_preds[0].argmax()]
-        return gender
-
-    # Get a reference to webcam video
-    webcam_video = cv2.VideoCapture(0)
-
-    # Create arrays of known face encodings, their names and their genders
-    known_face_encodings = []
-    known_face_names = []
-    known_gender = []
-
-    # Path of folder who contains images of each person
-    persons_path = "./train"
-    persons = os.listdir(persons_path)
-
-    # Manipulates each image in the folder of persons
-    for person in persons:
-        image_path = persons_path + '/' + person
-        filename = person[:-4]
-
-        person_image = face_recognition.load_image_file(image_path)
-        person_face_encoding = face_recognition.face_encodings(person_image)[0]
-        person_name = filename
-        person_gender = predictGender(image_path)
-
-        known_face_encodings.append(person_face_encoding)
-        known_face_names.append(person_name)
-        known_gender.append(person_gender)
-
-    # Check genders
-    print(known_gender)
-
-    # Initialize some variables
-    face_locations = []
-    face_encodings = []
-    face_names = []
-    gender_names = []
     process_this_frame = True
-
     while True:
         # Grab a single frame of video
         ret, frame = webcam_video.read()
         font = cv2.FONT_HERSHEY_DUPLEX
 
-        cv2.putText(frame, "Press q to quit.", (0, 30),
+        cv2.putText(frame, "Press Q to quit.", (0, 30),
                     font, 0.8, (255, 255, 255), 1)
 
         # Resize frame of video to 1/4 size for faster face recognition processing
@@ -206,4 +257,4 @@ if __name__ == "__main__":
     main()
 
 else:
-    print("running by module")
+    print("Running by module")
