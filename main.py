@@ -9,7 +9,7 @@ from datetime import datetime
 
 def init():
     global gender_net, gender_list, MODEL_MEAN_VALUES, webcam_video
-    global known_face_encodings, known_face_names, known_gender
+    global known_face_encodings, known_face_names, known_gender, training_directory
     global face_encodings, face_locations, face_names, gender_names
 
     # Loading the net from gender classification
@@ -33,6 +33,9 @@ def init():
     face_encodings = []
     face_names = []
     gender_names = []
+
+    # Directory of training folder
+    training_directory = ''.join((os.getcwd(), '\\', 'train'))
 
     print('Init complete')
 
@@ -167,11 +170,11 @@ def trainModel(training_folder):
 
 def main():
     init()
-    trainModel(
-        ''.join((os.getcwd(), '\\', 'train')))
+    trainModel(training_directory)
 
-    process_this_frame = True
+    process_counter = 0
     while True:
+
         # Grab a single frame of video
         ret, frame = webcam_video.read()
         font = cv2.FONT_HERSHEY_DUPLEX
@@ -185,8 +188,8 @@ def main():
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = small_frame[:, :, ::-1]
 
-        # Only process every other frame of video to save time
-        if process_this_frame:
+        # Only process every third frame of video to save time
+        if process_counter % 3 == 0:
 
             # Find all the faces and face encodings in the current frame of video
             face_locations = face_recognition.face_locations(rgb_small_frame)
@@ -196,6 +199,7 @@ def main():
             face_names = []
             gender_names = []
             for face_encoding in face_encodings:
+
                 # See if the face is a match for the known face(s)
                 matches = face_recognition.compare_faces(
                     known_face_encodings, face_encoding)
@@ -222,9 +226,10 @@ def main():
 
                 # If face is found that is not in training set
                 if name == '':
+
                     checkUnique(frame)
 
-        process_this_frame = not process_this_frame
+        process_counter += 1
 
         # Display the results
         for (top, right, bottom, left), name in zip(face_locations, face_names):
@@ -237,14 +242,14 @@ def main():
 
             # Draw a box around the face
             cv2.rectangle(frame, (left, top), (right, bottom), (255, 0, 0), 2)
-
             if name != '':
 
+                name = name.replace('_', " ")
                 # Draw a label with a name and gender below the face
                 cv2.rectangle(frame, (left, bottom),
                               (right, bottom + 56), (255, 0, 0), cv2.FILLED)
 
-                cv2.putText(frame, name, (left + 6, bottom + 24),
+                cv2.putText(frame, name[:-1], (left + 6, bottom + 24),
                             font, 0.8, (255, 255, 255), 1)
 
                 cv2.putText(frame, gender, (left + 6, bottom + 52),

@@ -43,4 +43,4 @@ Run main.py to run the program directly or run menu.py to run the GUI alternativ
 
 ## TO DO
 
-N/A
+- GUI upload images separated by s# folder 
